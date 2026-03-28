@@ -1,1 +1,5 @@
 /.idea
+
+/back/.venv
+
+/back/db.sqlite3
