@@ -35,7 +35,7 @@ The project is divided into frontend and backend:
 ## Team Members
 
 1. Daulet Konakbayev | 24B032154
-2. Konys Zhankozha | 24B
-3. Karasayeva Ayaulym | 24B
+2. Konys Zhankozha | 24B031141
+3. Karassayeva Ayaulym | 24B031139
 
 ---
