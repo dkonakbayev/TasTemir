@@ -1,5 +1,40 @@
 from rest_framework import serializers
-from .models import Trainer , FitnessClass
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.models import User
+from .models import Trainer, FitnessClass, Booking, Profile
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['username'] = user.username
+        try:
+            token['role'] = user.profile.role
+        except Profile.DoesNotExist:
+            token['role'] = 'user'
+        return token
+
+class RegisterSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True, min_length=6)
+    role = serializers.ChoiceField(choices=['user', 'admin'], default='user')
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError('Username already taken.')
+        return value
+
+    def create(self, validated_data):
+        role = validated_data.pop('role', 'user')
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data.get('email', ''),
+            password=validated_data['password'],
+        )
+        user.profile.role = role
+        user.profile.save()
+        return user
 
 class TrainerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,13 +42,20 @@ class TrainerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class FitnessClassSerializer(serializers.ModelSerializer):
+    trainer_name = serializers.CharField(source='trainer.name', read_only=True)
+
     class Meta:
         model = FitnessClass
-        fields = '__all__'
+        fields = ['id', 'title', 'description', 'datetime', 'capacity',
+                  'direction', 'trainer', 'trainer_name']
 
 class BookingSerializer(serializers.ModelSerializer):
-    fitness_class = serializers.IntegerField()
+    class_title = serializers.CharField(source='fitness_class.title', read_only=True)
+    class_direction = serializers.CharField(source='fitness_class.direction', read_only=True)
+    class_datetime = serializers.DateTimeField(source='fitness_class.datetime', read_only=True)
 
-class RegisterSerializer(serializers.ModelSerializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
+    class Meta:
+        model = Booking
+        fields = ['id', 'fitness_class', 'status', 'created_at',
+                  'class_title', 'class_direction', 'class_datetime']
+        read_only_fields = ['id', 'status', 'created_at']
