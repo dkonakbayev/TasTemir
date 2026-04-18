@@ -1,0 +1,117 @@
+<div class="about-page">
+
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-tag">Est. 2018 · Almaty</span>
+      <h1>Your City's<br><span class="accent">Premier</span><br>Fitness Center</h1>
+      <p>Tastemir Fitness – more than just a gym. Your health is in safe hands with our certified coaching team.
+        We welcome everyone – from pros to beginners – and tailor every workout to your individual needs.
+        We offer unique fitness programs and a true healthy lifestyle atmosphere, even if you've never trained before.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">6</span><span class="stat-label">Directions</span></div>
+      <div class="stat"><span class="stat-num">12+</span><span class="stat-label">Trainers</span></div>
+      <div class="stat"><span class="stat-num">500+</span><span class="stat-label">Members</span></div>
+      <div class="stat"><span class="stat-num">7</span><span class="stat-label">Days/week</span></div>
+    </div>
+  </section>
+
+  <section class="directions">
+    <div class="section-header">
+      <h2>Our Directions</h2>
+      <span class="section-num">06</span>
+    </div>
+    <p class="section-sub">Six disciplines, one roof — find what moves you.</p>
+    <div class="directions-grid">
+      @for (dir of directions; track dir.title) {
+        <div class="direction-card" (click)="openModal(dir)">
+          <span class="dir-icon">{{ dir.icon }}</span>
+          <h3>{{ dir.title }}</h3>
+          <p>{{ dir.description }}</p>
+          <span class="card-cta">Learn more →</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="contact">
+    <h2>Find Us</h2>
+    <div class="contact-grid">
+      <div class="contact-item">
+        <span class="contact-icon">📍</span>
+        <div>
+          <strong>Address</strong>
+          <p>123 Fitness Street, Almaty, Kazakhstan</p>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">🕐</span>
+        <div>
+          <strong>Working Hours</strong>
+          <p>Mon–Fri: 6:00–22:00<br>Sat–Sun: 8:00–20:00</p>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">📞</span>
+        <div>
+          <strong>Phone</strong>
+          <p>+7 (727) 123-45-67</p>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">✉️</span>
+        <div>
+          <strong>Email</strong>
+          <p>tastemir&#64;gmail.com</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Modal -->
+@if (selectedDirection) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeModal()">✕</button>
+
+      <div class="modal-header">
+        <span class="modal-icon">{{ selectedDirection.icon }}</span>
+        <div>
+          <h2>{{ selectedDirection.title }}</h2>
+          <div class="modal-badges">
+            <span class="badge">{{ selectedDirection.level }}</span>
+            <span class="badge">{{ selectedDirection.duration }}</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="modal-desc">{{ selectedDirection.longDescription }}</p>
+
+      <div class="modal-info-grid">
+        <div class="info-block">
+          <span class="info-label">Trainer</span>
+          <span class="info-value">{{ selectedDirection.trainer }}</span>
+        </div>
+        <div class="info-block">
+          <span class="info-label">Duration</span>
+          <span class="info-value">{{ selectedDirection.duration }}</span>
+        </div>
+        <div class="info-block">
+          <span class="info-label">Level</span>
+          <span class="info-value">{{ selectedDirection.level }}</span>
+        </div>
+      </div>
+
+      <div class="modal-schedule">
+        <span class="info-label">Weekly Schedule</span>
+        <div class="schedule-slots">
+          @for (slot of selectedDirection.schedule; track slot) {
+            <span class="slot">{{ slot }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

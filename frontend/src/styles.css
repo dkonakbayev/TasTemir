@@ -1,1 +1,36 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --accent: #c8f52d;
+  --accent-dim: rgba(200, 245, 45, 0.12);
+  --accent-glow: rgba(200, 245, 45, 0.25);
+  --bg: #080810;
+  --bg2: #0e0e1a;
+  --bg3: #141428;
+  --text: #f0f0f0;
+  --muted: #6b6b8a;
+  --border: rgba(255,255,255,0.07);
+  --border-accent: rgba(200, 245, 45, 0.3);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.03em; }
+
+a { text-decoration: none; color: inherit; }
+
+::-webkit-scrollbar       { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }

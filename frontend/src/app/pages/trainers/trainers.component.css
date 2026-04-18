@@ -1,0 +1,239 @@
+.trainers-page {
+  background: var(--bg);
+  min-height: calc(100vh - 64px);
+  color: var(--text);
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 5rem 2rem;
+}
+
+.page-header { margin-bottom: 3.5rem; }
+.page-header h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.0;
+  margin-bottom: 0.75rem;
+}
+.accent { color: var(--accent); }
+.page-header p { color: var(--muted); font-size: 1rem; }
+
+.trainers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(900px, 1fr));
+  gap: 1rem;
+}
+
+.trainer-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  cursor: pointer;
+  transition: border-color 0.25s, transform 0.25s;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.trainer-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.trainer-card:hover { border-color: var(--border-accent); transform: translateY(-3px); }
+.trainer-card:hover::before { transform: scaleX(1); }
+.trainer-card:hover .card-cta { color: var(--accent); }
+
+.trainer-top { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.1rem; }
+
+.avatar {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1.5px solid var(--border-accent);
+  color: var(--accent);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.05em;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.trainer-info h3 { font-size: 1.5rem; font-weight: 1000; margin-bottom: 0.2rem; }
+.specialization {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 0.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.experience { display: block; font-size: 1rem; color: var(--muted); }
+
+.bio { font-size: 1rem; color: var(--muted); line-height: 1.65; margin-bottom: 1rem; flex: 1; }
+
+.directions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+.dir-badge {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: border-color 0.2s, color 0.2s;
+}
+.trainer-card:hover .dir-badge { border-color: var(--border-accent); color: var(--accent); }
+
+.card-cta {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: color 0.2s;
+}
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border-accent);
+  border-radius: 20px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.25rem; right: 1.25rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.modal-close:hover { border-color: #ff4d6d; color: #ff4d6d; }
+
+.modal-header { display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.5rem; }
+.modal-avatar {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 2px solid var(--border-accent);
+  color: var(--accent);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.modal-header h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+.modal-spec {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.modal-dirs { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.dir-pill {
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-bio {
+  font-size: 0.925rem;
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+
+.block-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.block-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.block-list li {
+  font-size: 0.855rem;
+  color: var(--text);
+  padding-left: 1rem;
+  position: relative;
+  line-height: 1.5;
+}
+.block-list li::before { content: '·'; position: absolute; left: 0; color: var(--accent); }
+.block-list.achievement li::before { content: '★'; font-size: 0.65rem; top: 2px; color: var(--accent); }
+
+/* .modal-schedule { } */
+.schedule-slots { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+.slot {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-sm);
+}

@@ -1,0 +1,71 @@
+.navbar {
+  background: rgba(8, 8, 16, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2.5rem;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.7rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.links a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s, background 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.links a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+.links a.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.btn-login {
+  border: 1px solid var(--border-accent) !important;
+  color: var(--accent) !important;
+  background: transparent !important;
+  font-weight: 600 !important;
+}
+.btn-login:hover {
+  background: var(--accent-dim) !important;
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-logout:hover { border-color: #ff4d6d; color: #ff4d6d; }

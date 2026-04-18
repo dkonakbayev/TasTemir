@@ -1,0 +1,84 @@
+<div class="trainers-page">
+
+  <div class="page-header">
+    <h1>Meet Our <span class="accent">Trainers</span></h1>
+    <p>Our top coaches dedicated to helping you reach your goals.</p>
+  </div>
+
+  <div class="trainers-grid">
+    @for (trainer of trainers; track trainer.name) {
+      <div class="trainer-card" (click)="openModal(trainer)">
+        <div class="trainer-top">
+          <div class="avatar">{{ trainer.initials }}</div>
+          <div class="trainer-info">
+            <h3>{{ trainer.name }}</h3>
+            <span class="specialization">{{ trainer.specialization }}</span>
+            <span class="experience">{{ trainer.experience }} experience</span>
+          </div>
+        </div>
+        <p class="bio">{{ trainer.bio }}</p>
+        <div class="directions">
+          @for (dir of trainer.directions; track dir) {
+            <span class="dir-badge">{{ dir }}</span>
+          }
+        </div>
+        <span class="card-cta">View profile →</span>
+      </div>
+    }
+  </div>
+
+</div>
+
+<!-- Trainer Modal -->
+@if (selectedTrainer) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeModal()">✕</button>
+
+      <div class="modal-header">
+        <div class="modal-avatar">{{ selectedTrainer.initials }}</div>
+        <div>
+          <h2>{{ selectedTrainer.name }}</h2>
+          <span class="modal-spec">{{ selectedTrainer.specialization }}</span>
+          <div class="modal-dirs">
+            @for (dir of selectedTrainer.directions; track dir) {
+              <span class="dir-pill">{{ dir }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <p class="modal-bio">{{ selectedTrainer.fullBio }}</p>
+
+      <div class="modal-sections">
+        <div class="modal-block">
+          <span class="block-label">Certifications</span>
+          <ul class="block-list">
+            @for (cert of selectedTrainer.certifications; track cert) {
+              <li>{{ cert }}</li>
+            }
+          </ul>
+        </div>
+
+        <div class="modal-block">
+          <span class="block-label">Achievements</span>
+          <ul class="block-list achievement">
+            @for (a of selectedTrainer.achievements; track a) {
+              <li>{{ a }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal-schedule">
+        <span class="block-label">Schedule</span>
+        <div class="schedule-slots">
+          @for (slot of selectedTrainer.schedule; track slot) {
+            <span class="slot">{{ slot }}</span>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
