@@ -24,7 +24,7 @@ export class LoginComponent {
     this.auth.login(this.form).subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigate(this.auth.isAdmin() ? ['/admin/dashboard'] : ['/schedule']);
+        this.router.navigate(this.auth.isAdmin() ? ['/admin/classes'] : ['/schedule']);
       },
       error: err => {
         this.loading = false;

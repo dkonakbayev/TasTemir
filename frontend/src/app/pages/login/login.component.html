@@ -1,45 +1,45 @@
 <div class="auth-page">
-    <div class="auth-card">
-      <div class="auth-logo">TasTemir</div>
-      <h1>Welcome back</h1>
-      <p class="subtitle">Sign in to your account</p>
-  
-      @if (errorMessage) {
-        <div class="error-box">{{ errorMessage }}</div>
-      }
-  
-      <form (ngSubmit)="onSubmit()">
-        <div class="field">
-          <label for="username">Username</label>
-          <input
-            id="username"
-            type="text"
-            [(ngModel)]="form.username"
-            name="username"
-            placeholder="Enter your username"
-            required
-          />
-        </div>
-  
-        <div class="field">
-          <label for="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            [(ngModel)]="form.password"
-            name="password"
-            placeholder="Enter your password"
-            required
-          />
-        </div>
-  
-        <button type="submit" class="btn-primary" [disabled]="loading">
-          {{ loading ? 'Signing in...' : 'Sign In' }}
-        </button>
-      </form>
-  
-      <p class="switch-link">
-        Don't have an account? <a routerLink="/register">Register</a>
-      </p>
-    </div>
+  <div class="auth-card">
+    <div class="auth-logo">TasTemir</div>
+    <h1>Welcome back</h1>
+    <p class="subtitle">Sign in to your account</p>
+
+    @if (errorMessage) {
+      <div class="error-box">{{ errorMessage }}</div>
+    }
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="field">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          [(ngModel)]="form.username"
+          name="username"
+          placeholder="Enter your username"
+          required
+        />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="form.password"
+          name="password"
+          placeholder="Enter your password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        {{ loading ? 'Signing in...' : 'Sign In' }}
+      </button>
+    </form>
+
+    <p class="switch-link">
+      Don't have an account? <a routerLink="/register">Register</a>
+    </p>
   </div>
+</div>
