@@ -9,8 +9,7 @@ export interface AuthResponse   { access: string; refresh: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API = 'http://localhost:8000/api';
-
+  private readonly API = 'http://127.0.0.1:8000/api';
   constructor(private http: HttpClient, private router: Router) {}
 
   login(payload: LoginPayload): Observable<AuthResponse> {

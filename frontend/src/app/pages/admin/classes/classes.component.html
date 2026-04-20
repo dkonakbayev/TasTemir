@@ -1,0 +1,65 @@
+<div class="admin-page">
+    <div class="header-row">
+      <div>
+        <p class="eyebrow">Admin panel</p>
+        <h1>Manage Schedule</h1>
+      </div>
+    </div>
+  
+    <section class="form-card">
+      <h2>Add new class</h2>
+  
+      <div class="form-grid">
+        <input [(ngModel)]="form.title" placeholder="Class title" />
+  
+        <select [(ngModel)]="form.direction">
+          @for (direction of directions; track direction) {
+            <option [value]="direction">{{ direction }}</option>
+          }
+        </select>
+  
+        <input [(ngModel)]="form.trainer" placeholder="Trainer name" />
+        <input [(ngModel)]="form.hall" placeholder="Hall name" />
+  
+        <select [(ngModel)]="form.day">
+          @for (day of days; track day.key) {
+            <option [value]="day.key">{{ day.label }} · {{ day.date }}</option>
+          }
+        </select>
+  
+        <input [(ngModel)]="form.time" type="time" />
+        <input [(ngModel)]="form.capacity" type="number" min="1" placeholder="Capacity" />
+        <input [(ngModel)]="form.duration" type="number" min="30" placeholder="Duration" />
+      </div>
+  
+      <textarea [(ngModel)]="form.description" rows="4" placeholder="Class description"></textarea>
+  
+      <button class="primary-btn" (click)="addClass()" [disabled]="!form.title || !form.trainer || !form.hall || !form.description">
+        Add class
+      </button>
+    </section>
+  
+    <section class="cards-grid">
+      @for (item of classes; track item.id) {
+        <article class="class-card">
+          <div class="card-top">
+            <div>
+              <h3>{{ item.title }}</h3>
+              <p class="card-subtitle">{{ item.direction }}</p>
+            </div>
+            <span class="chip">{{ item.dayLabel }}</span>
+          </div>
+  
+          <p><strong>Trainer:</strong> {{ item.trainer }}</p>
+          <p><strong>Hall:</strong> {{ item.hall }}</p>
+          <p><strong>Time:</strong> {{ item.dateLabel }} · {{ item.time }}</p>
+          <p><strong>Booked:</strong> {{ item.bookedCount }} / {{ item.capacity }}</p>
+          <p><strong>Free spots:</strong> {{ freeSpots(item) }}</p>
+          <p class="description">{{ item.description }}</p>
+  
+          <button class="delete-btn" (click)="deleteClass(item.id)">Delete</button>
+        </article>
+      }
+    </section>
+  </div>
+  
