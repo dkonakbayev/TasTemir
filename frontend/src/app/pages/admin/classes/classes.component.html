@@ -18,8 +18,19 @@
           }
         </select>
   
-        <input [(ngModel)]="form.trainer" placeholder="Trainer name" />
-        <input [(ngModel)]="form.hall" placeholder="Hall name" />
+        <select [(ngModel)]="form.trainer">
+          @if (trainerOptions.length === 0) {
+            <option value="" disabled selected>No trainers available</option>
+          }
+          @for (trainer of trainerOptions; track trainer) {
+            <option [value]="trainer">{{ trainer }}</option>
+          }
+        </select>
+        <select [(ngModel)]="form.hall">
+          @for (hall of hallOptions; track hall) {
+            <option [value]="hall">{{ hall }}</option>
+          }
+        </select>
   
         <select [(ngModel)]="form.day">
           @for (day of days; track day.key) {
@@ -34,9 +45,12 @@
   
       <textarea [(ngModel)]="form.description" rows="4" placeholder="Class description"></textarea>
   
-      <button class="primary-btn" (click)="addClass()" [disabled]="!form.title || !form.trainer || !form.hall || !form.description">
+      <button class="primary-btn" (click)="addClass()" [disabled]="!form.title || !form.hall || !form.description">
         Add class
       </button>
+      @if (formError) {
+        <p class="error-text">{{ formError }}</p>
+      }
     </section>
   
     <section class="cards-grid">
@@ -62,4 +76,3 @@
       }
     </section>
   </div>
-  

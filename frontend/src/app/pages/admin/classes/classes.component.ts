@@ -13,6 +13,9 @@ import { FitnessClass, FitnessDayKey, FitnessDirection } from '../../../core/mod
 })
 export class ClassesComponent implements OnInit {
   classes: FitnessClass[] = [];
+  trainerOptions: string[] = [];
+  hallOptions: string[] = [];
+  formError = '';
 
   directions: FitnessDirection[] = ['Boxing', 'Yoga', 'Strength', 'Cycling', 'Pilates', 'Dance Fit'];
   days: { key: FitnessDayKey; label: string; date: string }[] = [
@@ -50,16 +53,51 @@ export class ClassesComponent implements OnInit {
   constructor(private classesService: ClassesService) {}
 
   ngOnInit(): void {
+    this.loadTrainerOptions();
+    this.loadHallOptions();
     this.loadClasses();
+  }
+
+  loadTrainerOptions(): void {
+    this.classesService.getTrainerNames().subscribe({
+      next: (trainers) => {
+        this.trainerOptions = trainers;
+        if (!this.form.trainer && trainers.length > 0) {
+          this.form.trainer = trainers[0];
+        }
+      },
+      error: () => {
+        this.formError = 'Failed to load trainers. Please refresh the page.';
+      }
+    });
   }
 
   loadClasses(): void {
     this.classesService.getClasses().subscribe(data => {
-      this.classes = data.sort((a, b) => `${a.day}-${a.time}`.localeCompare(`${b.day}-${b.time}`));
+      this.classes = data.sort((a, b) =>`${a.day}-${a.time}`.localeCompare(`${b.day}-${b.time}`)
+);
+    });
+  }
+
+  loadHallOptions(): void {
+    this.classesService.getHallOptions().subscribe({
+      next: (halls) => {
+        this.hallOptions = halls;
+        if (!this.form.hall && halls.length > 0) {
+          this.form.hall = halls[0];
+        }
+      },
+      error: () => {
+        this.hallOptions = ['Main hall', 'Hall A', 'Hall B'];
+        if (!this.form.hall) {
+          this.form.hall = this.hallOptions[0];
+        }
+      }
     });
   }
 
   addClass(): void {
+    this.formError = '';
     const selectedDay = this.days.find(day => day.key === this.form.day);
     if (!selectedDay) {
       return;
@@ -77,19 +115,24 @@ export class ClassesComponent implements OnInit {
       duration: this.form.duration,
       capacity: this.form.capacity,
       description: this.form.description
-    }).subscribe(() => {
-      this.loadClasses();
-      this.form = {
-        title: '',
-        direction: 'Boxing',
-        trainer: '',
-        hall: '',
-        day: 'mon',
-        time: '07:00',
-        capacity: 12,
-        duration: 50,
-        description: ''
-      };
+    }).subscribe({
+      next: () => {
+        this.loadClasses();
+        this.form = {
+          title: '',
+          direction: 'Boxing',
+          trainer: this.trainerOptions[0] ?? '',
+          hall: this.hallOptions[0] ?? '',
+          day: 'mon',
+          time: '07:00',
+          capacity: 12,
+          duration: 50,
+          description: ''
+        };
+      },
+      error: (err) => {
+        this.formError = err?.error?.error || err?.message || 'Failed to add class.';
+      }
     });
   }
 
