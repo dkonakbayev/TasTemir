@@ -43,11 +43,15 @@ class TrainerSerializer(serializers.ModelSerializer):
 
 class FitnessClassSerializer(serializers.ModelSerializer):
     trainer_name = serializers.CharField(source='trainer.name', read_only=True)
+    booked_count = serializers.SerializerMethodField()
+
+    def get_booked_count(self, obj):
+        return obj.bookings.filter(status='booked').count()
 
     class Meta:
         model = FitnessClass
         fields = ['id', 'title', 'description', 'datetime', 'capacity',
-                  'direction', 'trainer', 'trainer_name']
+                  'direction', 'trainer', 'trainer_name', 'booked_count']
 
 class BookingSerializer(serializers.ModelSerializer):
     class_title = serializers.CharField(source='fitness_class.title', read_only=True)
