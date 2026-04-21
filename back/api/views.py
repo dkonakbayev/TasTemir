@@ -85,6 +85,22 @@ def my_bookings(request):
     serializer = BookingSerializer(bookings, many=True)
     return Response(serializer.data)
 
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_profile(request):
+    user = request.user
+    try:
+        role = user.profile.role
+    except Profile.DoesNotExist:
+        role = 'user'
+
+    return Response({
+        'username': user.username,
+        'email': user.email,
+        'role': role,
+    })
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def cancel_booking(request, booking_id):
