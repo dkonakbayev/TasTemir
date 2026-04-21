@@ -36,7 +36,15 @@ class FitnessClass(models.Model):
     def __str__(self):
         return f'{self.title} — {self.direction}'
 
+
+class BookingManager(models.Manager):
+    def active(self):
+        return self.get_queryset().filter(status='booked')
+
+
 class Booking(models.Model):
+    objects = BookingManager()
+
     STATUS_CHOICES = (
         ('booked', 'Booked'),
         ('cancelled', 'Cancelled'),
