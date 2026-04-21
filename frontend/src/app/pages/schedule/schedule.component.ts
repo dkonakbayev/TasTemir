@@ -15,7 +15,7 @@ interface DayOption {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './schedule.component.html',
-  styleUrl: './schedule.component.css'
+  styleUrls: ['./schedule.component.css']
 })
 export class ScheduleComponent implements OnInit {
   classes: FitnessClass[] = [];
@@ -44,14 +44,14 @@ export class ScheduleComponent implements OnInit {
 
   ngOnInit(): void {
     this.directions = this.classesService.getDirections();
-    this.trainers = this.classesService.getTrainers();
-    this.halls = this.classesService.getHalls();
     this.loadClasses();
   }
 
   loadClasses(): void {
     this.classesService.getClasses().subscribe(data => {
       this.classes = data;
+      this.trainers = this.classesService.getTrainers();
+      this.halls = this.classesService.getHalls();
       this.applyFilters();
     });
   }
@@ -64,9 +64,15 @@ export class ScheduleComponent implements OnInit {
   applyFilters(): void {
     this.filteredClasses = this.classes
       .filter(item => item.day === this.selectedDay)
-      .filter(item => this.selectedDirection === 'All' || item.direction === this.selectedDirection)
-      .filter(item => this.selectedTrainer === 'All' || item.trainer === this.selectedTrainer)
-      .filter(item => this.selectedHall === 'All' || item.hall === this.selectedHall)
+      .filter(item =>
+        this.selectedDirection === 'All' || item.direction === this.selectedDirection
+      )
+      .filter(item =>
+        this.selectedTrainer === 'All' || item.trainer === this.selectedTrainer
+      )
+      .filter(item =>
+        this.selectedHall === 'All' || item.hall === this.selectedHall
+      )
       .sort((a, b) => a.time.localeCompare(b.time));
   }
 

@@ -1,202 +1,67 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, forkJoin, map, switchMap, throwError } from 'rxjs';
 import { FitnessClass, FitnessDayKey } from '../models/class.model';
+
+interface ApiFitnessClass {
+  id: number;
+  title: string;
+  description: string;
+  datetime: string;
+  capacity: number;
+  direction: string;
+  hall?: string;
+  trainer: number;
+  trainer_name: string;
+  booked_count: number;
+}
+
+interface ApiBooking {
+  id: number;
+  fitness_class: number;
+  status: 'booked' | 'cancelled';
+}
+
+interface ApiTrainer {
+  id: number;
+  name: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClassesService {
-  private classes: FitnessClass[] = [
-    {
-      id: 1,
-      title: 'Morning Boxing',
-      direction: 'Boxing',
-      trainer: 'Aibek Dzhaksybekov',
-      hall: 'Hall A',
-      day: 'mon',
-      dayLabel: 'Mon',
-      dateLabel: '13 Apr',
-      time: '07:00',
-      duration: 50,
-      capacity: 15,
-      bookedCount: 8,
-      description: 'High-energy boxing class focused on cardio, technique, and endurance.'
-    },
-    {
-      id: 2,
-      title: 'Yoga Flow',
-      direction: 'Yoga',
-      trainer: 'Salima Nurova',
-      hall: 'Zen Room',
-      day: 'mon',
-      dayLabel: 'Mon',
-      dateLabel: '13 Apr',
-      time: '08:00',
-      duration: 50,
-      capacity: 14,
-      bookedCount: 6,
-      description: 'Gentle stretching, breathing, and balance practice for all levels.'
-    },
-    {
-      id: 3,
-      title: 'Strength Base',
-      direction: 'Strength',
-      trainer: 'Nikita Voronov',
-      hall: 'Power Hall',
-      day: 'mon',
-      dayLabel: 'Mon',
-      dateLabel: '13 Apr',
-      time: '10:00',
-      duration: 50,
-      capacity: 12,
-      bookedCount: 7,
-      description: 'Full-body strength session with progressive overload and proper technique.'
-    },
-    {
-      id: 4,
-      title: 'Cycling Burn',
-      direction: 'Cycling',
-      trainer: 'Aruzhan Bek',
-      hall: 'Cycle Studio',
-      day: 'tue',
-      dayLabel: 'Tue',
-      dateLabel: '14 Apr',
-      time: '07:30',
-      duration: 50,
-      capacity: 16,
-      bookedCount: 10,
-      description: 'Fast-paced indoor ride with interval blocks and music-driven pace changes.'
-    },
-    {
-      id: 5,
-      title: 'Pilates Core',
-      direction: 'Pilates',
-      trainer: 'Dana Omir',
-      hall: 'Balance Hall',
-      day: 'tue',
-      dayLabel: 'Tue',
-      dateLabel: '14 Apr',
-      time: '09:00',
-      duration: 50,
-      capacity: 10,
-      bookedCount: 4,
-      description: 'Core stability, posture, and controlled movement training.'
-    },
-    {
-      id: 6,
-      title: 'Dance Fit Energy',
-      direction: 'Dance Fit',
-      trainer: 'Madina Bekova',
-      hall: 'Dance Hall',
-      day: 'wed',
-      dayLabel: 'Wed',
-      dateLabel: '15 Apr',
-      time: '18:00',
-      duration: 50,
-      capacity: 20,
-      bookedCount: 13,
-      description: 'Cardio dance session with easy combos and club-level energy.'
-    },
-    {
-      id: 7,
-      title: 'Boxing Technique',
-      direction: 'Boxing',
-      trainer: 'Aibek Dzhaksybekov',
-      hall: 'Hall A',
-      day: 'thu',
-      dayLabel: 'Thu',
-      dateLabel: '16 Apr',
-      time: '19:00',
-      duration: 50,
-      capacity: 15,
-      bookedCount: 11,
-      description: 'Focus on combinations, footwork, pads, and coordination.'
-    },
-    {
-      id: 8,
-      title: 'Sunrise Yoga',
-      direction: 'Yoga',
-      trainer: 'Salima Nurova',
-      hall: 'Zen Room',
-      day: 'fri',
-      dayLabel: 'Fri',
-      dateLabel: '17 Apr',
-      time: '07:00',
-      duration: 50,
-      capacity: 14,
-      bookedCount: 5,
-      description: 'Light morning flow to reset, stretch, and wake up the body.'
-    },
-    {
-      id: 9,
-      title: 'Leg Power Strength',
-      direction: 'Strength',
-      trainer: 'Nikita Voronov',
-      hall: 'Power Hall',
-      day: 'sat',
-      dayLabel: 'Sat',
-      dateLabel: '18 Apr',
-      time: '11:00',
-      duration: 50,
-      capacity: 12,
-      bookedCount: 9,
-      description: 'Lower-body and glute-focused strength workout.'
-    },
-    {
-      id: 10,
-      title: 'Weekend Dance Fit',
-      direction: 'Dance Fit',
-      trainer: 'Madina Bekova',
-      hall: 'Dance Hall',
-      day: 'sun',
-      dayLabel: 'Sun',
-      dateLabel: '19 Apr',
-      time: '12:00',
-      duration: 50,
-      capacity: 20,
-      bookedCount: 15,
-      description: 'Weekend class with upbeat choreography and cardio blocks.'
-    },
-    {
-      id: 11,
-      title: 'Pilates Stretch',
-      direction: 'Pilates',
-      trainer: 'Dana Omir',
-      hall: 'Balance Hall',
-      day: 'wed',
-      dayLabel: 'Wed',
-      dateLabel: '15 Apr',
-      time: '09:30',
-      duration: 50,
-      capacity: 10,
-      bookedCount: 3,
-      description: 'Mobility and posture work with pilates fundamentals.'
-    },
-    {
-      id: 12,
-      title: 'Cycling Endurance',
-      direction: 'Cycling',
-      trainer: 'Aruzhan Bek',
-      hall: 'Cycle Studio',
-      day: 'fri',
-      dayLabel: 'Fri',
-      dateLabel: '17 Apr',
-      time: '18:30',
-      duration: 50,
-      capacity: 16,
-      bookedCount: 12,
-      description: 'Longer effort blocks to build stamina and leg power.'
-    }
-  ];
+  private readonly API = 'http://127.0.0.1:8000/api';
+  private bookingIdByClassId = new Map<number, number>();
+  private bookedClassIds = new Set<number>();
+  private lastLoadedClasses: FitnessClass[] = [];
 
-  private myBookings: number[] = [2, 6];
+  constructor(private http: HttpClient) {}
 
   getClasses(): Observable<FitnessClass[]> {
-    return of([...this.classes]);
+    return forkJoin({
+      classes: this.http.get<ApiFitnessClass[]>(`${this.API}/classes/`),
+      bookings: this.http.get<ApiBooking[]>(`${this.API}/my-bookings/`)
+    }).pipe(
+      map(({ classes, bookings }) => {
+        this.bookingIdByClassId.clear();
+        this.bookedClassIds.clear();
+        bookings
+          .filter((booking) => booking.status === 'booked')
+          .forEach((booking) => {
+            this.bookingIdByClassId.set(booking.fitness_class, booking.id);
+            this.bookedClassIds.add(booking.fitness_class);
+          });
+
+        const mapped = classes.map((item) => this.mapApiClass(item));
+        this.lastLoadedClasses = mapped;
+        return mapped;
+      })
+    );
   }
 
   getClassesByDay(day: FitnessDayKey): Observable<FitnessClass[]> {
-    return of(this.classes.filter(item => item.day === day));
+    return this.getClasses().pipe(map((items) => items.filter((item) => item.day === day)));
   }
 
   getDirections(): string[] {
@@ -204,49 +69,109 @@ export class ClassesService {
   }
 
   getTrainers(): string[] {
-    const trainers = [...new Set(this.classes.map(item => item.trainer))];
+    const trainers = [...new Set(this.lastLoadedClasses.map((item) => item.trainer))];
     return ['All', ...trainers];
   }
 
   getHalls(): string[] {
-    const halls = [...new Set(this.classes.map(item => item.hall))];
+    const halls = [...new Set(this.lastLoadedClasses.map((item) => item.hall))];
     return ['All', ...halls];
   }
 
+  getTrainerNames(): Observable<string[]> {
+    return this.http.get<ApiTrainer[]>(`${this.API}/trainers/`).pipe(
+      map((trainers) => trainers.map((trainer) => trainer.name))
+    );
+  }
+
+  getHallOptions(): Observable<string[]> {
+    return this.http.get<ApiFitnessClass[]>(`${this.API}/classes/`).pipe(
+      map((classes) => {
+        const halls = [...new Set(classes.map((item) => item.hall).filter(Boolean) as string[])];
+        return halls.length ? halls : ['Main hall', 'Hall A', 'Hall B'];
+      })
+    );
+  }
+
   bookClass(classId: number): Observable<void> {
-    const selected = this.classes.find(item => item.id === classId);
-    if (selected && selected.bookedCount < selected.capacity && !this.myBookings.includes(classId)) {
-      selected.bookedCount += 1;
-      this.myBookings.push(classId);
-    }
-    return of(void 0);
+    return this.http.post(`${this.API}/book/`, { fitness_class: classId }).pipe(
+      map(() => void 0)
+    );
   }
 
   cancelBooking(classId: number): Observable<void> {
-    const selected = this.classes.find(item => item.id === classId);
-    if (selected && this.myBookings.includes(classId)) {
-      selected.bookedCount -= 1;
-      this.myBookings = this.myBookings.filter(id => id !== classId);
+    const bookingId = this.bookingIdByClassId.get(classId);
+    if (!bookingId) {
+      return throwError(() => new Error('Booking id not found for class.'));
     }
-    return of(void 0);
+    return this.http.post(`${this.API}/cancel/${bookingId}/`, {}).pipe(map(() => void 0));
   }
 
   isBooked(classId: number): boolean {
-    return this.myBookings.includes(classId);
+    return this.bookedClassIds.has(classId);
   }
 
   addClass(newClass: Omit<FitnessClass, 'id' | 'bookedCount'>): Observable<void> {
-    this.classes.push({
-      ...newClass,
-      id: Date.now(),
-      bookedCount: 0
-    });
-    return of(void 0);
+    return this.http.get<ApiTrainer[]>(`${this.API}/trainers/`).pipe(
+      switchMap((trainers) => {
+        const trainer = trainers.find(
+          (item) => item.name.toLowerCase() === newClass.trainer.trim().toLowerCase()
+        );
+        if (!trainer) {
+          return throwError(() => new Error('Trainer not found. Use exact trainer name from trainers list.'));
+        }
+
+        const [hours, minutes] = newClass.time.split(':').map(Number);
+        const date = this.getNextDateForDay(newClass.day, hours, minutes);
+return this.http.post(`${this.API}/admin/classes/`, {
+          title: newClass.title,
+          description: newClass.description,
+          datetime: date.toISOString(),
+          capacity: newClass.capacity,
+          direction: newClass.direction,
+          hall: newClass.hall,
+          trainer: trainer.id
+        });
+      }),
+      map(() => void 0)
+    );
   }
 
   deleteClass(id: number): Observable<void> {
-    this.classes = this.classes.filter(item => item.id !== id);
-    this.myBookings = this.myBookings.filter(itemId => itemId !== id);
-    return of(void 0);
+    return this.http.delete(`${this.API}/admin/classes/${id}/`).pipe(map(() => void 0));
+  }
+
+  private mapApiClass(item: ApiFitnessClass): FitnessClass {
+    const date = new Date(item.datetime);
+    const dayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][date.getDay()] as FitnessDayKey;
+    const dayLabel = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+    const dateLabel = `${date.getDate()} ${date.toLocaleString('en-US', { month: 'short' })}`;
+    const time = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+
+    return {
+      id: item.id,
+      title: item.title,
+      direction: item.direction as FitnessClass['direction'],
+      trainer: item.trainer_name,
+      hall: item.hall || 'Main hall',
+      day: dayKey,
+      dayLabel,
+      dateLabel,
+      time,
+      duration: 50,
+      capacity: item.capacity,
+      bookedCount: item.booked_count,
+      description: item.description
+    };
+  }
+
+  private getNextDateForDay(day: FitnessDayKey, hours: number, minutes: number): Date {
+    const targetDay = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].indexOf(day);
+    const now = new Date();
+    const date = new Date(now);
+    const diff = (targetDay - date.getDay() + 7) % 7;
+    date.setDate(date.getDate() + diff);
+    date.setHours(hours, minutes, 0, 0);
+    return date;
   }
 }
