@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { ClassesService } from '../../../core/services/classes.service';
-import { FitnessClass, FitnessDayKey, FitnessDirection } from '../../../core/models/class.model';
+import { FitnessClass, FitnessDirection } from '../../../core/models/class.model';
 
 @Component({
   selector: 'app-classes',
@@ -14,26 +15,18 @@ import { FitnessClass, FitnessDayKey, FitnessDirection } from '../../../core/mod
 export class ClassesComponent implements OnInit {
   classes: FitnessClass[] = [];
   trainerOptions: string[] = [];
-  hallOptions: string[] = [];
   formError = '';
+  isAdding = false;
+  deletingIds: number[] = [];
 
   directions: FitnessDirection[] = ['Boxing', 'Yoga', 'Strength', 'Cycling', 'Pilates', 'Dance Fit'];
-  days: { key: FitnessDayKey; label: string; date: string }[] = [
-    { key: 'mon', label: 'Mon', date: '13 Apr' },
-    { key: 'tue', label: 'Tue', date: '14 Apr' },
-    { key: 'wed', label: 'Wed', date: '15 Apr' },
-    { key: 'thu', label: 'Thu', date: '16 Apr' },
-    { key: 'fri', label: 'Fri', date: '17 Apr' },
-    { key: 'sat', label: 'Sat', date: '18 Apr' },
-    { key: 'sun', label: 'Sun', date: '19 Apr' }
-  ];
 
   form: {
     title: string;
     direction: FitnessDirection;
     trainer: string;
     hall: string;
-    day: FitnessDayKey;
+    date: string;
     time: string;
     capacity: number;
     duration: number;
@@ -43,18 +36,20 @@ export class ClassesComponent implements OnInit {
     direction: 'Boxing',
     trainer: '',
     hall: '',
-    day: 'mon',
+    date: this.getTodayDate(),
     time: '07:00',
     capacity: 12,
     duration: 50,
     description: ''
   };
 
-  constructor(private classesService: ClassesService) {}
+  constructor(
+    private classesService: ClassesService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadTrainerOptions();
-    this.loadHallOptions();
     this.loadClasses();
   }
 
@@ -73,74 +68,114 @@ export class ClassesComponent implements OnInit {
   }
 
   loadClasses(): void {
-    this.classesService.getClasses().subscribe(data => {
-      this.classes = data.sort((a, b) =>`${a.day}-${a.time}`.localeCompare(`${b.day}-${b.time}`)
-);
-    });
-  }
-
-  loadHallOptions(): void {
-    this.classesService.getHallOptions().subscribe({
-      next: (halls) => {
-        this.hallOptions = halls;
-        if (!this.form.hall && halls.length > 0) {
-          this.form.hall = halls[0];
-        }
+    this.classesService.getClasses().subscribe({
+      next: (data) => {
+        this.classes = this.sortClasses(data);
+        this.cdr.detectChanges();
       },
       error: () => {
-        this.hallOptions = ['Main hall', 'Hall A', 'Hall B'];
-        if (!this.form.hall) {
-          this.form.hall = this.hallOptions[0];
-        }
+        this.formError = 'Failed to load classes.';
       }
     });
   }
 
   addClass(): void {
-    this.formError = '';
-    const selectedDay = this.days.find(day => day.key === this.form.day);
-    if (!selectedDay) {
+    if (this.isAdding) {
       return;
     }
 
-    this.classesService.addClass({
-      title: this.form.title,
-      direction: this.form.direction,
-      trainer: this.form.trainer,
-      hall: this.form.hall,
-      day: this.form.day,
-      dayLabel: selectedDay.label,
-      dateLabel: selectedDay.date,
-      time: this.form.time,
-      duration: this.form.duration,
-      capacity: this.form.capacity,
-      description: this.form.description
-    }).subscribe({
-      next: () => {
-        this.loadClasses();
-        this.form = {
-          title: '',
-          direction: 'Boxing',
-          trainer: this.trainerOptions[0] ?? '',
-          hall: this.hallOptions[0] ?? '',
-          day: 'mon',
-          time: '07:00',
-          capacity: 12,
-          duration: 50,
-          description: ''
-        };
-      },
-      error: (err) => {
-        this.formError = err?.error?.error || err?.message || 'Failed to add class.';
-      }
-    });
+    this.formError = '';
+    this.isAdding = true;
+
+    this.classesService
+      .addClass({
+        title: this.form.title.trim(),
+        direction: this.form.direction,
+        trainer: this.form.trainer,
+        hall: this.form.hall.trim(),
+        date: this.form.date,
+        day: 'mon',
+        dayLabel: '',
+        dateLabel: '',
+        time: this.form.time,
+        duration: this.form.duration,
+        capacity: this.form.capacity,
+        description: this.form.description.trim()
+      })
+      .pipe(finalize(() => (this.isAdding = false)))
+      .subscribe({
+        next: () => {
+          this.resetForm();
+          this.loadClasses();
+        },
+        error: (err) => {
+          this.formError = err?.error?.error || err?.message || 'Failed to add class.';
+        }
+      });
   }
 
   deleteClass(id: number): void {
-    this.classesService.deleteClass(id).subscribe(() => this.loadClasses());
+    if (this.deletingIds.includes(id)) {
+      return;
+    }
+
+    const previousClasses = [...this.classes];
+    this.deletingIds = [...this.deletingIds, id];
+    this.classes = this.classes.filter((item) => item.id !== id);
+
+    this.classesService
+      .deleteClass(id)
+      .pipe(finalize(() => {
+        this.deletingIds = this.deletingIds.filter((itemId) => itemId !== id);
+      }))
+      .subscribe({
+        next: () => {
+          this.loadClasses();
+        },
+        error: () => {
+          this.classes = previousClasses;
+          this.formError = 'Failed to delete class.';
+        }
+      });
+  }
+
+  isDeleting(id: number): boolean {
+    return this.deletingIds.includes(id);
   }
 
   freeSpots(item: FitnessClass): number {
     return item.capacity - item.bookedCount;
+  }
+
+  trackById(_: number, item: FitnessClass): number {
+    return item.id;
+  }
+
+  private resetForm(): void {
+    this.form = {
+      title: '',
+      direction: 'Boxing',
+      trainer: this.trainerOptions[0] ?? '',
+      hall: this.form.hall,
+      date: this.getTodayDate(),
+      time: '07:00',
+      capacity: 12,
+      duration: 50,
+      description: ''
+    };
+  }
+
+  private sortClasses(items: FitnessClass[]): FitnessClass[] {
+    return [...items].sort(
+      (a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+    );
+  }
+
+  private getTodayDate(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

@@ -23,11 +23,21 @@ class Trainer(models.Model):
         return self.name
 
 class FitnessClass(models.Model):
+    DIRECTION_CHOICES = (
+        ('Boxing', 'Boxing'),
+        ('Yoga', 'Yoga'),
+        ('Strength', 'Strength'),
+        ('Cycling', 'Cycling'),
+        ('Pilates', 'Pilates'),
+        ('Dance Fit', 'Dance Fit'),
+    )
+
     title = models.CharField(max_length=255)
     description = models.TextField()
     datetime = models.DateTimeField()
     capacity = models.PositiveIntegerField()
-    direction = models.CharField(max_length=100)
+    direction = models.CharField(max_length=100, choices=DIRECTION_CHOICES)
+    hall = models.CharField(max_length=100, blank=True, default='')
     trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name='classes')
 
     class Meta:

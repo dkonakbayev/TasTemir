@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { ClassesService } from '../../core/services/classes.service';
-import { FitnessClass, FitnessDayKey } from '../../core/models/class.model';
+import { FitnessClass } from '../../core/models/class.model';
 
-interface DayOption {
-  key: FitnessDayKey;
-  short: string;
-  date: string;
+interface DateOption {
+  value: string;
+  label: string;
+  dayLabel: string;
 }
 
 @Component({
@@ -20,27 +21,18 @@ interface DayOption {
 export class ScheduleComponent implements OnInit {
   classes: FitnessClass[] = [];
   filteredClasses: FitnessClass[] = [];
+  loading = false;
 
-  selectedDay: FitnessDayKey = 'mon';
+  selectedDate = '';
   selectedDirection = 'All';
   selectedTrainer = 'All';
-  selectedHall = 'All';
 
-  dayOptions: DayOption[] = [
-    { key: 'mon', short: 'Mon', date: '13' },
-    { key: 'tue', short: 'Tue', date: '14' },
-    { key: 'wed', short: 'Wed', date: '15' },
-    { key: 'thu', short: 'Thu', date: '16' },
-    { key: 'fri', short: 'Fri', date: '17' },
-    { key: 'sat', short: 'Sat', date: '18' },
-    { key: 'sun', short: 'Sun', date: '19' }
-  ];
-
+  dateOptions: DateOption[] = [];
   directions: string[] = [];
   trainers: string[] = [];
-  halls: string[] = [];
+  pendingBookingIds = new Set<number>();
 
-  constructor(public classesService: ClassesService) {}
+  constructor(public classesService: ClassesService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.directions = this.classesService.getDirections();
@@ -48,54 +40,135 @@ export class ScheduleComponent implements OnInit {
   }
 
   loadClasses(): void {
-    this.classesService.getClasses().subscribe(data => {
-      this.classes = data;
-      this.trainers = this.classesService.getTrainers();
-      this.halls = this.classesService.getHalls();
-      this.applyFilters();
+    this.loading = true;
+    this.classesService.getClasses().subscribe({
+      next: (data) => {
+        this.classes = [...data].sort(
+          (a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+        );
+        this.trainers = this.classesService.getTrainers();
+        this.buildDateOptions();
+        this.applyFilters();
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.classes = [];
+        this.filteredClasses = [];
+        this.dateOptions = [];
+        this.loading = false;
+      }
     });
   }
 
-  setDay(day: FitnessDayKey): void {
-    this.selectedDay = day;
+  buildDateOptions(): void {
+    const seen = new Set<string>();
+    this.dateOptions = this.classes
+      .filter(item => {
+        if (seen.has(item.dateKey)) {
+          return false;
+        }
+        seen.add(item.dateKey);
+        return true;
+      })
+      .map(item => ({
+        value: item.dateKey,
+        label: item.dateLabel,
+        dayLabel: item.dayLabel
+      }));
+
+    if (!this.dateOptions.length) {
+      this.selectedDate = '';
+      return;
+    }
+
+    const selectedStillExists = this.dateOptions.some(option => option.value === this.selectedDate);
+    if (!selectedStillExists) {
+      this.selectedDate = this.dateOptions[0].value;
+    }
+  }
+
+  setDate(date: string): void {
+    this.selectedDate = date;
     this.applyFilters();
   }
 
   applyFilters(): void {
     this.filteredClasses = this.classes
-      .filter(item => item.day === this.selectedDay)
-      .filter(item =>
-        this.selectedDirection === 'All' || item.direction === this.selectedDirection
-      )
-      .filter(item =>
-        this.selectedTrainer === 'All' || item.trainer === this.selectedTrainer
-      )
-      .filter(item =>
-        this.selectedHall === 'All' || item.hall === this.selectedHall
-      )
-      .sort((a, b) => a.time.localeCompare(b.time));
+      .filter(item => !this.selectedDate || item.dateKey === this.selectedDate)
+      .filter(item => this.selectedDirection === 'All' || item.direction === this.selectedDirection)
+      .filter(item => this.selectedTrainer === 'All' || item.trainer === this.selectedTrainer)
+      .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
+    this.cdr.detectChanges();
   }
 
   resetFilters(): void {
     this.selectedDirection = 'All';
     this.selectedTrainer = 'All';
-    this.selectedHall = 'All';
+    this.selectedDate = this.dateOptions[0]?.value ?? '';
     this.applyFilters();
   }
 
   book(id: number): void {
-    this.classesService.bookClass(id).subscribe(() => this.loadClasses());
+    if (this.isPending(id)) {
+      return;
+    }
+
+    this.pendingBookingIds.add(id);
+    this.classesService.bookClass(id)
+      .pipe(finalize(() => this.pendingBookingIds.delete(id)))
+      .subscribe({
+        next: () => {
+          this.updateLocalClass(id, 1);
+          this.applyFilters();
+        },
+        error: () => {
+          this.loadClasses();
+        }
+      });
   }
 
   cancel(id: number): void {
-    this.classesService.cancelBooking(id).subscribe(() => this.loadClasses());
+    if (this.isPending(id)) {
+      return;
+    }
+
+    this.pendingBookingIds.add(id);
+    this.classesService.cancelBooking(id)
+      .pipe(finalize(() => this.pendingBookingIds.delete(id)))
+      .subscribe({
+        next: () => {
+          this.updateLocalClass(id, -1);
+          this.applyFilters();
+        },
+        error: () => {
+          this.loadClasses();
+        }
+      });
   }
 
   isBooked(id: number): boolean {
     return this.classesService.isBooked(id);
   }
 
+  isPending(id: number): boolean {
+    return this.pendingBookingIds.has(id);
+  }
+
   freeSpots(item: FitnessClass): number {
     return item.capacity - item.bookedCount;
+  }
+
+  private updateLocalClass(id: number, diff: number): void {
+    this.classes = this.classes.map((item) => {
+      if (item.id !== id) {
+        return item;
+      }
+
+      return {
+        ...item,
+        bookedCount: Math.max(0, item.bookedCount + diff)
+      };
+    });
   }
 }

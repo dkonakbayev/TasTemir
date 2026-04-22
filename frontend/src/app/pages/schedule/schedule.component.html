@@ -1,86 +1,78 @@
 <div class="schedule-page">
-    <div class="schedule-header">
-      <div>
-        <p class="eyebrow">Fitness Center</p>
-        <h1>Schedule</h1>
-      </div>
-      <button class="ghost-btn" (click)="resetFilters()">Reset filters</button>
+  <div class="schedule-header">
+    <div>
+      <p class="eyebrow">Fitness Center</p>
+      <h1>Schedule</h1>
     </div>
-  
-    <div class="filters-row">
-      <select [(ngModel)]="selectedHall" (ngModelChange)="applyFilters()">
-        @for (hall of halls; track hall) {
-          <option [value]="hall">{{ hall }}</option>
-        }
-      </select>
-  
-      <select [(ngModel)]="selectedDirection" (ngModelChange)="applyFilters()">
-        @for (direction of directions; track direction) {
-          <option [value]="direction">{{ direction }}</option>
-        }
-      </select>
-  
-      <select [(ngModel)]="selectedTrainer" (ngModelChange)="applyFilters()">
-        @for (trainer of trainers; track trainer) {
-          <option [value]="trainer">{{ trainer }}</option>
-        }
-      </select>
-    </div>
-  
-    <div class="days-row">
-      @for (day of dayOptions; track day.key) {
-        <button
-          type="button"
-          class="day-pill"
-          [class.active]="selectedDay === day.key"
-          (click)="setDay(day.key)">
-          <span>{{ day.short }}</span>
-          <strong>{{ day.date }}</strong>
-        </button>
-      }
-    </div>
-  
-    <div class="schedule-list">
-      @if (filteredClasses.length === 0) {
-        <div class="empty-state">
-          <h3>No classes found</h3>
-          <p>Try another day or reset filters. Schedule is being dramatic again.</p>
-        </div>
-      }
-  
-      @for (item of filteredClasses; track item.id) {
-        <article class="class-card">
-          <div class="time-block">
-            <div class="time">{{ item.time }}</div>
-            <div class="duration">{{ item.duration }} min</div>
-          </div>
-  
-          <div class="accent-line"></div>
-  
-          <div class="content-block">
-            <div class="title-row">
-              <h2>{{ item.title }}</h2>
-              <span class="badge">{{ item.direction }}</span>
-            </div>
-  
-            <p class="meta">Hall: {{ item.hall }}</p>
-            <p class="meta">Trainer: {{ item.trainer }}</p>
-            <p class="meta">{{ item.dayLabel }}, {{ item.dateLabel }} · {{ item.time }}</p>
-            <p class="spots">Free spots: {{ freeSpots(item) }}</p>
-            <p class="description">{{ item.description }}</p>
-  
-            @if (!isBooked(item.id)) {
-              <button class="book-btn" (click)="book(item.id)" [disabled]="freeSpots(item) === 0">
-                Sign up for class
-              </button>
-            } @else {
-              <button class="cancel-btn" (click)="cancel(item.id)">
-                Cancel booking
-              </button>
-            }
-          </div>
-        </article>
-      }
-    </div>
+    <button class="ghost-btn" (click)="resetFilters()">Reset filters</button>
   </div>
-  
+
+  <div class="filters-row">
+    <select [(ngModel)]="selectedDirection" (ngModelChange)="applyFilters()">
+      <option *ngFor="let direction of directions" [value]="direction">{{ direction }}</option>
+    </select>
+
+    <select [(ngModel)]="selectedTrainer" (ngModelChange)="applyFilters()">
+      <option *ngFor="let trainer of trainers" [value]="trainer">{{ trainer }}</option>
+    </select>
+  </div>
+
+  <div class="days-row" *ngIf="dateOptions.length > 0">
+    <button
+      *ngFor="let option of dateOptions"
+      type="button"
+      class="day-pill"
+      [class.active]="selectedDate === option.value"
+      (click)="setDate(option.value)">
+      <span>{{ option.dayLabel }}</span>
+      <strong>{{ option.label }}</strong>
+    </button>
+  </div>
+
+  <div class="schedule-list">
+    <div class="empty-state" *ngIf="loading">
+      <h3>Loading classes...</h3>
+      <p>Fetching the schedule from the backend.</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && filteredClasses.length === 0">
+      <h3>No classes found</h3>
+      <p>Try another date or reset filters.</p>
+    </div>
+
+    <article class="class-card" *ngFor="let item of filteredClasses">
+      <div class="time-block">
+        <div class="time">{{ item.time }}</div>
+        <div class="duration">{{ item.duration }} min</div>
+      </div>
+
+      <div class="accent-line"></div>
+
+      <div class="content-block">
+        <div class="title-row">
+          <h2>{{ item.title }}</h2>
+          <span class="badge">{{ item.direction }}</span>
+        </div>
+
+        <p class="meta">Hall: {{ item.hall }}</p>
+        <p class="meta">Trainer: {{ item.trainer }}</p>
+        <p class="meta">{{ item.dayLabel }}, {{ item.dateLabel }} · {{ item.time }}</p>
+        <p class="spots">Free spots: {{ freeSpots(item) }}</p>
+        <p class="description">{{ item.description }}</p>
+
+        <button
+          *ngIf="!isBooked(item.id); else cancelButton"
+          class="book-btn"
+          (click)="book(item.id)"
+          [disabled]="freeSpots(item) === 0 || isPending(item.id)">
+          {{ isPending(item.id) ? 'Saving...' : 'Sign up for class' }}
+        </button>
+        <ng-template #cancelButton>
+          <button class="cancel-btn" (click)="cancel(item.id)" [disabled]="isPending(item.id)">
+            {{ isPending(item.id) ? 'Cancelling...' : 'Cancel booking' }}
+          </button>
+        </ng-template>
+      </div>
+    </article>
+  </div>
+</div>

@@ -10,9 +10,24 @@ export interface FitnessClass {
   day: FitnessDayKey;
   dayLabel: string;
   dateLabel: string;
+  dateKey: string;
+  datetime: string;
   time: string;
   duration: number;
   capacity: number;
   bookedCount: number;
   description: string;
+}
+
+export interface BookingItem {
+  id: number;
+  fitnessClassId: number;
+  status: 'booked' | 'cancelled';
+  createdAt: string;
+  classTitle: string;
+  classDirection: string;
+  classDatetime: string;
+  classHall: string;
+  classTrainer: string;
+  classDescription: string;
 }

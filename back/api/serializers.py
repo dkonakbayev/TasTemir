@@ -51,15 +51,18 @@ class FitnessClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = FitnessClass
         fields = ['id', 'title', 'description', 'datetime', 'capacity',
-                  'direction', 'trainer', 'trainer_name', 'booked_count']
+                  'direction', 'hall', 'trainer', 'trainer_name', 'booked_count']
 
 class BookingSerializer(serializers.ModelSerializer):
     class_title = serializers.CharField(source='fitness_class.title', read_only=True)
     class_direction = serializers.CharField(source='fitness_class.direction', read_only=True)
     class_datetime = serializers.DateTimeField(source='fitness_class.datetime', read_only=True)
+    class_hall = serializers.CharField(source='fitness_class.hall', read_only=True)
+    class_trainer = serializers.CharField(source='fitness_class.trainer.name', read_only=True)
+    class_description = serializers.CharField(source='fitness_class.description', read_only=True)
 
     class Meta:
         model = Booking
         fields = ['id', 'fitness_class', 'status', 'created_at',
-                  'class_title', 'class_direction', 'class_datetime']
+                  'class_title', 'class_direction', 'class_datetime', 'class_hall', 'class_trainer', 'class_description']
         read_only_fields = ['id', 'status', 'created_at']

@@ -1,27 +1,11 @@
 <div class="profile-page">
-    <div class="profile-card">
-      <div class="avatar">{{ initials }}</div>
-  
-      <div class="profile-info">
-        <p class="eyebrow">Personal account</p>
-        <h1>{{ auth.getUsername() || 'User' }}</h1>
-        <p class="role">Role: {{ auth.getRole() || 'user' }}</p>
-      </div>
+  <div class="profile-card">
+    <div class="avatar">{{ initials }}</div>
+
+    <div class="profile-info">
+      <p class="eyebrow">Personal account</p>
+      <h1>{{ auth.getUsername() || 'User' }}</h1>
+      <p class="role">Role: {{ auth.getRole() || 'user' }}</p>
     </div>
-  
-    <!-- <div class="stats-grid">
-      <div class="stat-card">
-        <h3>Active plan</h3>
-        <p>12 classes left</p>
-      </div>
-      <div class="stat-card">
-        <h3>Progress</h3>
-        <p>4 workouts this week</p>
-      </div>
-      <div class="stat-card">
-        <h3>Status</h3>
-        <p>Ready to train. Slay mode enabled.</p>
-      </div>
-    </div> -->
   </div>
-  
+</div>
