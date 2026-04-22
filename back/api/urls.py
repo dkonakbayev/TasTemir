@@ -16,6 +16,7 @@ urlpatterns = [
     path('book/', views.book_class, name='book-class'),
     path('my-bookings/', views.my_bookings, name='my-bookings'),
     path('cancel/<int:booking_id>/', views.cancel_booking, name='cancel-booking'),
+    path('cancel-by-class/<int:class_id>/', views.cancel_booking_by_class, name='cancel-booking-by-class'),
 
     path('admin/classes/', views.AdminClassesView.as_view(), name='admin-classes'),
     path('admin/classes/<int:pk>/', views.AdminClassDetailView.as_view(), name='admin-class-detail'),

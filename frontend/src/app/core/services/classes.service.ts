@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, forkJoin, map, of, switchMap, throwError } from 'rxjs';
+import { Observable, forkJoin, map, switchMap, throwError } from 'rxjs';
 import { BookingItem, FitnessClass } from '../models/class.model';
 
 interface ApiFitnessClass {
@@ -48,7 +48,7 @@ export class ClassesService {
   getClasses(): Observable<FitnessClass[]> {
     return forkJoin({
       classes: this.http.get<ApiFitnessClass[]>(`${this.API}/classes/`),
-      bookings: this.http.get<ApiBooking[]>(`${this.API}/my-bookings/`).pipe(catchError(() => of([])))
+      bookings: this.http.get<ApiBooking[]>(`${this.API}/my-bookings/`)
     }).pipe(
       map(({ classes, bookings }) => {
         this.syncBookings(bookings);
@@ -117,12 +117,7 @@ export class ClassesService {
   }
 
   cancelBooking(classId: number): Observable<void> {
-    const bookingId = this.bookingIdByClassId.get(classId);
-    if (!bookingId) {
-      return throwError(() => new Error('Booking id not found for class.'));
-    }
-
-    return this.http.post(`${this.API}/cancel/${bookingId}/`, {}).pipe(
+    return this.http.post(`${this.API}/cancel-by-class/${classId}/`, {}).pipe(
       map(() => {
         this.bookingIdByClassId.delete(classId);
         this.bookedClassIds.delete(classId);

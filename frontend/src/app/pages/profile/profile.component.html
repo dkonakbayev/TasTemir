@@ -8,4 +8,24 @@
       <p class="role">Role: {{ auth.getRole() || 'user' }}</p>
     </div>
   </div>
+
+  <section class="bookings-section">
+    <h2>My booked classes</h2>
+    @if (loading) {
+      <p class="muted">Loading...</p>
+    } @else if (bookings.length === 0) {
+      <p class="muted">You have no active bookings yet.</p>
+    } @else {
+      <div class="bookings-grid">
+        @for (item of bookings; track item.id) {
+          <article class="booking-card">
+            <h3>{{ item.classTitle }}</h3>
+            <p>{{ item.classDirection }} · {{ item.classDatetime | date:'EEE, d MMM, HH:mm' }}</p>
+            <p>Trainer: {{ item.classTrainer }}</p>
+            <p>Hall: {{ item.classHall }}</p>
+          </article>
+        }
+      </div>
+    }
+  </section>
 </div>

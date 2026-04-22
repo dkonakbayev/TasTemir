@@ -86,6 +86,23 @@ def my_bookings(request):
     return Response(serializer.data)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_booking_by_class(request, class_id):
+    try:
+        booking = Booking.objects.get(
+            fitness_class_id=class_id,
+            user=request.user,
+            status='booked'
+        )
+    except Booking.DoesNotExist:
+        return Response({'error': 'Booking not found.'}, status=404)
+
+    booking.status = 'cancelled'
+    booking.save()
+    return Response({'message': 'Cancelled.'})
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_profile(request):
